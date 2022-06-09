@@ -1,6 +1,6 @@
 <?php
 
-namespace Outl1ne\NovaTranslationsLoader;
+namespace Outl1ne\MultiselectField\Traits;
 
 use Exception;
 use Laravel\Nova\Nova;
