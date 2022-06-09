@@ -5,7 +5,7 @@ namespace Outl1ne\MultiselectField;
 use Laravel\Nova\Nova;
 use Laravel\Nova\Events\ServingNova;
 use Illuminate\Support\ServiceProvider;
-namespace Outl1ne\MultiselectField\Traits\LoadsNovaTranslations;
+use Outl1ne\MultiselectField\Traits\LoadsNovaTranslations;
 
 class FieldServiceProvider extends ServiceProvider
 {
