@@ -165,6 +165,14 @@ export default {
       });
     }
 
+
+    // Testing adding default values
+
+    if (this.field.default) {
+      console.log(this.field.default)
+      this.value.push(this.field.default)
+    }
+
     // Emit initial value
     this.$nextTick(() => {
       Nova.$emit(`multiselect-${this.field.attribute}-input`, this.value);

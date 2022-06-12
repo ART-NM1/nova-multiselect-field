@@ -352,4 +352,11 @@ class Multiselect extends Field implements RelatableField
     {
         return $this->withMeta(['asHtml' => true]);
     }
+
+    public function default($options)
+    {
+        return $this->withMeta([
+            'default'   => $options
+        ]);
+    }
 }
