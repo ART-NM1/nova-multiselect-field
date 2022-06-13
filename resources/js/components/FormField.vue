@@ -167,7 +167,7 @@ export default {
 
 
     // Testing adding default values
-
+    console.log(this.field, 'test');
     if (this.field.default) {
       console.log(this.field.default)
       this.value.push(this.field.default)
