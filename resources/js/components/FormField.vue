@@ -167,8 +167,12 @@ export default {
 
 
     // Testing adding default values
-    console.log(this.field, 'test');
-    if (this.field.default) {
+    console.log(this.field, 'test2', this.value);
+    this.value.push(this.field.default)
+
+    // Check if its the create screen and defaults list is there.
+    // Add the values to the value array
+    if (this.field.default.length) {
       console.log(this.field.default)
       this.value.push(this.field.default)
     }

@@ -353,7 +353,13 @@ class Multiselect extends Field implements RelatableField
         return $this->withMeta(['asHtml' => true]);
     }
 
-    public function default($options)
+    /**
+     * Allows some default values to be set on create
+     *
+     * @param $options
+     * @return Multiselect
+     */
+    public function defaultOnCreate($options)
     {
         return $this->withMeta([
             'default'   => $options

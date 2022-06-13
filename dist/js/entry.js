@@ -4667,9 +4667,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     } // Testing adding default values
 
 
-    console.log(this.field, 'test');
+    console.log(this.field, 'test2', this.value);
+    this.value.push(this.field["default"]); // Check if its the create screen and defaults list is there.
+    // Add the values to the value array
 
-    if (this.field["default"]) {
+    if (this.field["default"].length) {
       console.log(this.field["default"]);
       this.value.push(this.field["default"]);
     } // Emit initial value
