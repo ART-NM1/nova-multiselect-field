@@ -165,18 +165,6 @@ export default {
       });
     }
 
-
-    // Testing adding default values
-    console.log(this.field, 'test2', this.value);
-    this.value.push(this.field.default)
-
-    // Check if its the create screen and defaults list is there.
-    // Add the values to the value array
-    if (this.field.default.length) {
-      console.log(this.field.default)
-      this.value.push(this.field.default)
-    }
-
     // Emit initial value
     this.$nextTick(() => {
       Nova.$emit(`multiselect-${this.field.attribute}-input`, this.value);
@@ -213,8 +201,26 @@ export default {
   methods: {
     setInitialValue() {
       if (this.isMultiselect) {
+
+        // Creates a default array for default values
+        let defaults = [];
+
+        // If there are defaults and its the create screen only set the array of defaults
+        if(this.field.default && this.field.createOnly ? this.field.uniqueKey.includes('create') : false){
+          defaults = this.field.default;
+        }
+
+        // Original getting the vlaues
         const valuesArray = this.getInitialFieldValuesArray();
-        this.value = valuesArray && valuesArray.length ? valuesArray.map(this.getValueFromOptions).filter(Boolean) : [];
+
+        // Set to a initial values array
+        let initialValues  = valuesArray && valuesArray.length ?
+          valuesArray.map(this.getValueFromOptions)
+            .filter(Boolean)
+          : [];
+
+        // Join on the defaults array
+        this.value = initialValues.concat(defaults)
       } else {
         this.value = this.getValueFromOptions(this.field.value);
       }

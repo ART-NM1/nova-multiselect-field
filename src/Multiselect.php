@@ -359,10 +359,13 @@ class Multiselect extends Field implements RelatableField
      * @param $options
      * @return Multiselect
      */
-    public function defaultOnCreate($options)
+    public function defaultOnCreate($options, $labelKey)
     {
         return $this->withMeta([
-            'default'   => $options
+            'default'   => $options->map(function ($label, $value) use($labelKey) {
+                return ['label' => $label->{$labelKey}, 'value' => $value];
+            })->values()->all(),
+            'createOnly' => true,
         ]);
     }
 }
