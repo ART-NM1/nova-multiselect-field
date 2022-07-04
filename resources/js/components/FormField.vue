@@ -1,7 +1,7 @@
 <template>
   <DefaultField :field="field" :showHelpText="showHelpText" :errors="errors">
     <template #field>
-      <div class="outl1ne-multiselect-field flex flex-col">
+      <div class="custom-multiselect-field flex flex-col">
         <!-- Multi select field -->
         <multiselect
           v-if="!reorderMode"
@@ -37,7 +37,7 @@
           @tag="addTag"
         >
           <template #maxElements>
-            {{ __('novaMultiselect.maxElements', { max: String(field.max || '') }) }}
+            {{ __('novaMultiselect.maxElements', {max: String(field.max || '')}) }}
           </template>
 
           <template #noResult>
@@ -87,14 +87,14 @@
 </template>
 
 <script>
-import { FormField, HandlesValidationErrors } from 'laravel-nova';
+import {FormField, HandlesValidationErrors} from 'laravel-nova';
 import HandlesFieldValue from '../mixins/HandlesFieldValue';
 import Multiselect from 'vue-multiselect/src/Multiselect';
 import VueDraggable from 'vuedraggable';
 import debounce from 'lodash/debounce';
 
 export default {
-  components: { Multiselect, VueDraggable },
+  components: {Multiselect, VueDraggable},
 
   mixins: [FormField, HandlesValidationErrors, HandlesFieldValue],
 
@@ -131,7 +131,7 @@ export default {
             if (newOptions.find(o => o.value === value)) return;
 
             let label = this.field.optionsDependOnOptions[option.value][value];
-            newOptions.push({ label, value });
+            newOptions.push({label, value});
           });
         });
 
@@ -168,6 +168,7 @@ export default {
     // Emit initial value
     this.$nextTick(() => {
       Nova.$emit(`multiselect-${this.field.attribute}-input`, this.value);
+      this.tryToFetchOptions();
     });
   },
 
@@ -206,7 +207,7 @@ export default {
         let defaults = [];
 
         // If there are defaults and its the create screen only set the array of defaults
-        if(this.field.default && this.field.createOnly ? this.field.uniqueKey.includes('create') : false){
+        if (this.field.default && this.field.createOnly ? this.field.uniqueKey.includes('create') : false) {
           defaults = this.field.default;
         }
 
@@ -214,7 +215,7 @@ export default {
         const valuesArray = this.getInitialFieldValuesArray();
 
         // Set to a initial values array
-        let initialValues  = valuesArray && valuesArray.length ?
+        let initialValues = valuesArray && valuesArray.length ?
           valuesArray.map(this.getValueFromOptions)
             .filter(Boolean)
           : [];
@@ -295,7 +296,7 @@ export default {
 
     newDistinctOption(option) {
       // Only return $disabled option if values match
-      if (this.distinctValues.includes(option.value)) return { ...option, $isDisabled: true };
+      if (this.distinctValues.includes(option.value)) return {...option, $isDisabled: true};
 
       // Force remove $isDisabled
       delete option.$isDisabled;
@@ -309,7 +310,7 @@ export default {
       const el = ms.$el;
 
       const handlePositioning = () => {
-        const { top, height, bottom } = el.getBoundingClientRect();
+        const {top, height, bottom} = el.getBoundingClientRect();
         if (onOpen) ms.$refs.list.scrollTop = 0;
 
         const fromBottom = (window.innerHeight || document.documentElement.clientHeight) - bottom;
@@ -348,7 +349,7 @@ export default {
     },
 
     fetchOptions: debounce(async function (search) {
-      const { data } = await Nova.request().get(`${this.field.apiUrl}`, { params: { search } });
+      const {data} = await Nova.request().get(`${this.field.apiUrl}`, {params: {search}});
 
       // Response is not an array or an object
       if (typeof data !== 'object') throw new Error('Server response was invalid.');
@@ -367,7 +368,7 @@ export default {
         for (const resource of data.resources) {
           const label = resource.display || resource.title || '-';
           const value = resource.value || resource.id.value || null;
-          newOptions.push({ value, label });
+          newOptions.push({value, label});
         }
 
         this.asyncOptions = newOptions;
@@ -375,14 +376,14 @@ export default {
         return;
       }
 
-      this.asyncOptions = Object.entries(data).map(entry => ({ label: entry[1], value: entry[0] }));
+      this.asyncOptions = Object.entries(data).map(entry => ({label: entry[1], value: entry[0]}));
       this.isLoading = false;
     }, 500),
 
     tryToFetchOptions(query) {
       if (!this.field.apiUrl) return;
 
-      if (query.length >= 1) {
+      if (query === undefined || query.length >= 1) {
         this.asyncOptions = [];
         this.isLoading = true;
         try {
@@ -398,204 +399,248 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.outl1ne-multiselect-field {
-  .multiselect__tags {
-    --tw-border-opacity: 1;
-    border-width: 1px;
+<style lang="scss" scoped>
+.custom-multiselect-field {
+  :deep(.multiselect) {
+    min-height: 36px;
 
-    border-color: rgba(var(--colors-gray-300), var(--tw-border-opacity));
-    background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
-    color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+    .multiselect__select {
+      height: calc(100% - 2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-    .dark & {
-      border-color: rgba(var(--colors-gray-700), var(--tw-border-opacity));
-      background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
-      color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
-    }
-  }
-
-  .multiselect__input {
-    border: none;
-    background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
-    color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
-
-    .dark & {
-      background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
-      color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
-    }
-  }
-
-  .multiselect__tag {
-    background-color: rgba(var(--colors-primary-500));
-    color: rgba(var(--colors-white), var(--tw-text-opacity));
-    --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    font-weight: 700;
-
-    /* .dark & {
-      color: rgba(var(--colors-gray-900), var(--tw-text-opacity));
-    } */
-
-    .multiselect__tag-icon {
-      &::after {
-        color: rgba(var(--colors-white));
-      }
-
-      &:hover {
-        background: rgba(var(--colors-primary-400));
-
-        &::after {
-          color: rgba(var(--colors-red-500));
-        }
-      }
-    }
-  }
-
-  .multiselect > .multiselect__clear {
-    &::before,
-    &::after {
-      width: 2px;
-      background: rgba(var(--colors-gray-400));
-    }
-
-    &:hover {
-      &::before,
-      &::after {
-        background: rgba(var(--colors-red-400));
-      }
-    }
-  }
-
-  .multiselect__single {
-    background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
-    color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
-
-    .dark & {
-      background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
-      color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
-    }
-  }
-
-  .multiselect__spinner {
-    background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
-    color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
-
-    .dark & {
-      background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
-      color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
-    }
-
-    &:before,
-    &:after {
-      border-color: rgba(var(--colors-primary-500)) transparent transparent;
-    }
-  }
-
-  .multiselect__content-wrapper {
-    border-color: rgba(var(--colors-gray-300), var(--tw-border-opacity));
-
-    .dark & {
-      border-color: rgba(var(--colors-gray-700), var(--tw-border-opacity));
-    }
-
-    li > span.multiselect__option {
-      background-color: #fff;
-      color: rgba(var(--colors-gray-400));
-
-      .dark & {
-        background-color: rgba(var(--colors-gray-900));
+      &:before {
+        position: initial;
+        margin: 0;
       }
     }
 
-    .multiselect__element {
+    .multiselect__tags {
+      --tw-border-opacity: 1;
+      border-width: 1px;
+      border-color: rgba(var(--colors-gray-300), var(--tw-border-opacity));
       background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
       color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+      min-height: 36px;
+      padding-top: 6px;
+      padding-left: 6px;
 
       .dark & {
+        border-color: rgba(var(--colors-gray-700), var(--tw-border-opacity));
         background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
         color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
       }
 
-      .multiselect__option {
-        color: rgba(var(--colors-gray-600));
+      .multiselect__tags-wrap {
+        display: flex;
+        align-items: center;
+      }
+
+      .multiselect__input {
+        border: none;
+        background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
+        color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+        font-size: 14px;
+        top: 2px;
+        left: 1px;
+
+        &::placeholder {
+          color: rgba(var(--colors-gray-400), 1);
+        }
 
         .dark & {
-          color: rgba(var(--colors-gray-400));
-        }
+          background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
+          color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
 
-        &.multiselect__option--selected {
-          color: rgba(var(--colors-primary-400));
-          background-color: rgba(var(--colors-white));
-
-          .dark & {
-            background-color: rgba(var(--colors-gray-900));
+          &::placeholder {
+            color: rgba(var(--colors-gray-600), 1);
           }
         }
+      }
 
-        &.multiselect__option--highlight {
-          background-color: rgba(var(--colors-primary-500));
-          color: rgba(var(--colors-white));
+      .multiselect__placeholder {
+        margin-bottom: 6px;
+        padding-left: 6px;
+        color: rgba(var(--colors-gray-400), 1);
+
+        .dark & {
+          color: rgba(var(--colors-gray-600), 1);
+        }
+      }
+
+      .multiselect__tag {
+        background-color: rgba(var(--colors-primary-500));
+        --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        margin-bottom: 3px;
+        margin-right: 6px;
+
+        .multiselect__tag-icon {
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
 
           &::after {
-            background-color: rgba(var(--colors-primary-500));
-            font-weight: 700;
+            color: rgba(var(--colors-white));
+          }
+
+          &:hover {
+            background: rgba(var(--colors-primary-400));
+
+            &::after {
+              color: rgba(var(--colors-white));
+            }
+          }
+        }
+      }
+
+      .multiselect > .multiselect__clear {
+        &::before,
+        &::after {
+          width: 2px;
+          background: rgba(var(--colors-gray-400));
+        }
+
+        &:hover {
+          &::before,
+          &::after {
+            background: rgba(var(--colors-red-400));
+          }
+        }
+      }
+
+      .multiselect__single {
+        background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
+        color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+
+        .dark & {
+          background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
+          color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
+        }
+      }
+
+      .multiselect__spinner {
+        background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
+        color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+
+        .dark & {
+          background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
+          color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
+        }
+
+        &:before,
+        &:after {
+          border-color: rgba(var(--colors-primary-500)) transparent transparent;
+        }
+      }
+    }
+
+    .multiselect__content-wrapper {
+      border-color: rgba(var(--colors-gray-300), var(--tw-border-opacity));
+
+      .dark & {
+        border-color: rgba(var(--colors-gray-700), var(--tw-border-opacity));
+      }
+
+      li > span.multiselect__option {
+        background-color: #fff;
+        color: rgba(var(--colors-gray-400));
+
+        .dark & {
+          background-color: rgba(var(--colors-gray-900));
+        }
+      }
+
+      .multiselect__element {
+        background-color: rgba(var(--colors-white), var(--tw-bg-opacity));
+        color: rgba(var(--colors-gray-600), var(--tw-text-opacity));
+
+        .dark & {
+          background-color: rgba(var(--colors-gray-900), var(--tw-bg-opacity));
+          color: rgba(var(--colors-gray-400), var(--tw-text-opacity));
+        }
+
+        .multiselect__option {
+          color: rgba(var(--colors-gray-600));
+          font-size: 14px;
+
+          .dark & {
+            color: rgba(var(--colors-gray-400));
           }
 
           &.multiselect__option--selected {
-            background-color: rgba(var(--colors-red-500));
+            color: rgba(var(--colors-primary-400));
+            background-color: rgba(var(--colors-white));
 
             .dark & {
+              background-color: rgba(var(--colors-gray-900));
+            }
+          }
+
+          &.multiselect__option--highlight {
+            background-color: rgba(var(--colors-primary-500));
+            color: var(--colors-white);
+
+            &::after {
+              background-color: rgba(var(--colors-primary-500));
+              font-weight: 700;
+            }
+
+            &.multiselect__option--selected {
               background-color: rgba(var(--colors-red-500));
+
+              .dark & {
+                background-color: rgba(var(--colors-red-500));
+              }
             }
           }
         }
       }
     }
-  }
 
-  .reorder__tag {
-    background-color: rgba(var(--colors-primary-500));
-    border-radius: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 5px;
-    font-weight: 700;
-    transition: all 0.2s ease-in-out;
+    .reorder__tag {
+      background-color: rgba(var(--colors-primary-500));
+      border-radius: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 5px;
+      font-weight: 700;
+      transition: all 0.2s ease-in-out;
 
-    &:hover {
-      cursor: pointer;
-      opacity: 0.8;
+      &:hover {
+        cursor: pointer;
+        opacity: 0.8;
+      }
     }
-  }
 
-  .multiselect__clear {
-    position: absolute;
-    right: 41px;
-    height: 40px;
-    width: 40px;
-    display: block;
-    cursor: pointer;
-    z-index: 2;
-
-    &::before,
-    &::after {
-      content: '';
-      display: block;
+    .multiselect__clear {
       position: absolute;
-      width: 3px;
-      height: 16px;
-      background: #aaa;
-      top: 12px;
-      right: 4px;
-    }
+      right: 41px;
+      height: 40px;
+      width: 40px;
+      display: block;
+      cursor: pointer;
+      z-index: 2;
 
-    &::before {
-      transform: rotate(45deg);
-    }
+      &::before,
+      &::after {
+        content: '';
+        display: block;
+        position: absolute;
+        width: 3px;
+        height: 16px;
+        background: #aaa;
+        top: 12px;
+        right: 4px;
+      }
 
-    &::after {
-      transform: rotate(-45deg);
+      &::before {
+        transform: rotate(45deg);
+      }
+
+      &::after {
+        transform: rotate(-45deg);
+      }
     }
   }
 }
